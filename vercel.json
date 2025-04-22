@@ -6,11 +6,10 @@
       "use": "@vercel/node"
     },
     {
-      "src": "package.json",
+      "src": "client/package.json",
       "use": "@vercel/static-build",
       "config": {
-        "buildCommand": "npm run build",
-        "outputDirectory": "dist/public"
+        "distDir": "client/dist"
       }
     }
   ],
@@ -21,10 +20,10 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/"
+      "dest": "/index.html"
     }
   ],
   "env": {
     "NODE_ENV": "production"
   }
-} 
+}
