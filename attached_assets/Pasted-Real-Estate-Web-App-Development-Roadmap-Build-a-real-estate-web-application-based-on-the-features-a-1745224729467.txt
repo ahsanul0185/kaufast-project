@@ -1,0 +1,137 @@
+Real Estate Web App Development Roadmap 
+Build a real estate web application based on the features and development process detailed in the provided document.
+Phase 1: Project Setup & Foundation
+Define Project Scope & Technologies:
+Goal: Real estate web app (like zillow) with the modern design.
+Tech Stack:
+Frontend: React (using Vite)
+Backend: Express.js (Node.js)
+Database: PostgreSQL (potentially with PostGIS)
+Authentication: standard email/password
+Styling: Tailwind CSS, Shadcn UI components
+Mapping: Leaflet, react-leaflet
+Real-time: WebSockets
+AI: OpenAI, Anthropic (optional, for advanced features)
+ORM/Query Builder: Drizzle ORM (implied)
+React-router-dom
+Database Setup (PostgreSQL):
+Set up a PostgreSQL database instance 
+Define initial database schemas using Drizzle ORM (or chosen tool):
+users: Include fields for id, username, password (hashed), email, full_name, role (enum: 'user', 'agent', 'admin'), subscription_tier (enum: 'free', 'premium', 'enterprise'), preferred_language.
+properties: Include fields for id, title, description, price, address, city, state, zip_code, country, latitude, longitude, bedrooms, bathrooms, square_feet, lot_size, property_type (enum), features (jsonb), images (jsonb array of URLs), owner_id (FK to users), is_premium (boolean), listing_type (enum: 'buy', 'rent', 'sell'), neighborhood_id (FK).
+neighborhoods: Include fields for id, name, city, state, zip_code, latitude, longitude, scores (overall, safety, schools, transit, etc.), median_home_price, etc. (Expand as needed).
+favorites: user_id (FK), property_id (FK).
+messages: id, sender_id (FK), receiver_id (FK), property_id (FK, optional), content, created_at.
+(Later phases add tables for: property_tours, chat_analytics, etc.)
+Implement database connection logic (server/db.ts).
+Create a storage interface (IStorage) and implementation (DatabaseStorage in server/storage.ts) for database operations.
+Run initial database migrations (drizzle-kit push or similar).
+Basic Backend Setup (Express):
+Set up the main server entry point (server/index.ts).
+Configure essential middleware (JSON body parsing, CORS if needed, session management if using).
+Establish basic API routing structure (server/routes.ts).
+Basic Frontend Setup (React/Vite):
+Configure Vite (vite.config.js).
+Set up Tailwind CSS (tailwind.config.ts, index.css).
+Create main application files (client/src/main.tsx, client/src/App.tsx).
+Implement client-side routing 
+Create core layout components: Navbar.tsx, Footer.tsx.
+Set up React Query (@tanstack/react-query) for data fetching and caching (client/src/lib/queryClient.ts).
+
+
+Phase 2: Core Features - Property Listings & Management
+Property Data & Display:
+Refine properties schema based on required display fields.
+Develop PropertyCard component for listings. Handle layout variations, image placeholders, action buttons (Save, Compare, Share), and visual tags (Featured, Premium).
+Develop PropertyDetailsPage. Display all property info, image gallery/carousel, map integration, description, features list. Use Tabs for organization. Include action buttons.
+Develop HomePage with Hero section (background image, headline, search bar) and Featured Properties section (displaying cards).
+Property Management (Dashboard):
+Create PropertiesManagement component for Agent/Admin dashboards.
+Implement functionality: View user's properties, Add New Property, Edit Property, Delete Property.
+Develop comprehensive AddPropertyForm / EditPropertyForm.
+Include all fields from the properties schema.
+Integrate PropertyLocationPicker component (using Leaflet map with draw tools) to replace manual latitude/longitude inputs.
+Implement backend API endpoints for property CRUD operations, including authorization checks (user can only manage their own properties, unless admin).
+Implement logic for marking properties as "Premium" (potentially tied to subscription).
+Favorites System:
+Add "Save" (heart icon) button to PropertyCard and PropertyDetailsPage.
+Implement useFavorites hook or similar state management for favorite status.
+Create backend API endpoints (POST /api/user/favorites, DELETE /api/user/favorites/:propertyId) to manage entries in the favorites table. Validate input.
+Update button UI based on favorite status (filled/unfilled heart). Fetch initial favorite status on component load.
+Create "My Favorites" section in the User Dashboard.
+Phase 3: Search & Mapping
+Search Filters & UI:
+Implement main search bar (Hero section) for location input.
+Develop comprehensive SearchFilters component. Include inputs/controls for:
+Listing Type (Tabs: Buy/Rent/Sell).
+Property Type (Dropdown).
+Price Range (Slider or Min/Max).
+Beds/Baths (Dropdowns/Buttons).
+Area (SqM - Min/Max).
+Lot Size (Min/Max).
+Year Built (Min/Max).
+Features (Checkboxes).
+Implement "Advanced Search" / "More Filters" collapsible section. Add context-specific "Apply Filters" button.
+Update shared Zod schema (searchPropertiesSchema) for validation.
+Search Backend & Results:
+Enhance backend search API (/api/properties/search) to handle all filter parameters, including spatial queries (Phase 4.4).
+Develop SearchResultsPage. Fetch and display results based on query parameters from URL. Use PropertyCard components. Implement view options (Grid, List, Map).
+Display active filters as removable badges. Update URL on filter changes.
+Implement pagination or infinite scrolling.
+Map Integration (Leaflet):
+Integrate react-leaflet for map displays.
+Show properties as markers on the map view of search results. Customize marker appearance (price, icon). Style map controls.
+Implement interactive map tooltips on marker hover.
+Spatial Search (PostGIS):
+Ensure PostGIS extension is enabled in PostgreSQL.
+Add geometry column (type geometry(POINT, 4326)) to properties table.
+Create database trigger to auto-populate geometry from latitude/longitude.
+Add GIST index on geometry.
+Update backend storage (searchProperties method) to use ST_DWithin for radius searches based on latitude, longitude, radius input parameters.
+Update search API and frontend filters to support radius search input.
+Phase 4: Advanced Features & User Experience
+UI/UX Enhancements:
+Implement engaging "Bubble" notifications (Framer Motion) via a custom hook/provider.
+Enhance Property Sharing: Create PropertyShare component with social media links/copy functionality, integrate into details page.
+Make a quicl add property pop up audio enabled.
+Add draft fetaire
+Suggestion and paid suggested
+Verified real estate agent
+
+
+Phase 5: AI-Powered Features (Optional)
+AI Service Setup:
+Get OpenAI/Anthropic API keys (store in Replit Secrets).
+Install SDKs. Create backend utility modules (server/openai.ts, server/anthropic.ts) with API call logic and error handling.
+AI Recommendation Engine (OpenAI):
+Backend: Track user activity (searches, views, favorites). Generate user preference profiles. Implement recommendation logic (property matching based on profile). Create API endpoint.
+Frontend: Develop RecommendedProperties component. Integrate into relevant pages. Consider adding "Match Score".
+
+
+
+
+Phase 6: Premium Features & Final Touches
+Bulk Property Upload (Premium):
+Backend: Develop API endpoint (/api/properties/bulk-upload) to parse CSV/Excel, validate, and insert properties. Handle multi-image URLs (pipe-separated). Protect with premium subscription check.
+Frontend: Create BulkUploadPage (premium access only). Add file input, template/example downloads, help text, processing feedback.
+Advanced Analytics Dashboard (Owners/Agents):
+Expand existing analytics components. Add owner-specific KPIs (views, inquiries, tours). Implement visualizations, market trends, filtering. Restrict access appropriately.
+Final Styling & Branding:
+Ensure UI consistency (colors like graphite/dark blue, fonts, spacing).
+Update branding elements (logo, company name "Inmobi®", footer).
+Conduct thorough cross-browser and responsive testing.
+Phase 7: Core Features - Authentication & User Management
+Standard Authentication:
+Develop authentication UI: Login and Registration pages/forms (client/src/pages/auth-page.tsx). Use UI library components (e.g., Shadcn UI).
+Implement backend API endpoints for register, login, logout (/api/register, /api/login, /api/logout). Create frontend authentication context/hook (client/src/hooks/use-auth.tsx) managing user state, loading, errors, and providing login, register, logout functions. Wrap the app in an AuthProvider.
+Implement form validation (client-side and server-side using Zod schemas defined in shared/schema.ts).
+Address potential initialization/context/dependency issues during development.
+
+User Roles & Dashboards:
+Implement role-based protected routes (client/src/lib/protected-route.tsx) checking user role from auth context.
+Create distinct dashboard pages (UserDashboard, AgentDashboard, AdminDashboard).
+Develop corresponding sidebar components (UserSidebar, AgentSidebar, AdminSidebar) with role-specific navigation links. Apply distinct styling if desired.
+Create placeholder components for dashboard sections (User: Profile, Favorites, Messages; Agent: Property Listings, Profile; Admin: User Management, Settings, Approvals).
+Phase 8: Deployment & Maintenance
+Error Handling & Monitoring: Implement comprehensive error handling (try/catch, user-friendly messages). Utilize Replit monitoring or external tools. Practice defensive coding.
+Maintenance: Plan for updates, bug fixes, dependency management, backups.
